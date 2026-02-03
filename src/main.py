@@ -3,6 +3,7 @@ from flask import Flask, jsonify, request
 from src.services.character_service import CharacterService
 from src.services.planet_service import PlanetService
 from src.services.starships_service import StarshipsService
+from src.services.vehicles_service import VehiclesService
 
 app = Flask(__name__)
 
@@ -16,6 +17,7 @@ logger = logging.getLogger(__name__)
 character_service = CharacterService()
 planet_service = PlanetService()
 starshipsService = StarshipsService()
+vehicles_service = VehiclesService()
 
 @app.route('/personagens', methods=['GET'])
 def list_or_search_characters():
@@ -54,3 +56,12 @@ def list_starships():
 @app.route('/nave/<int:id>', methods=['GET'])
 def starship_details(id):
     return jsonify(starshipsService.get_starship_details(id))
+
+@app.route('/veiculos', methods=['GET'])
+def list_vehicles():
+    page = request.args.get('page', 1, type=int)
+    return jsonify(vehicles_service.get_vehicles(page))
+
+@app.route('/veiculo/<int:id>', methods=['GET'])
+def vehicle_details(id):
+    return jsonify(vehicles_service.get_vehicle_details(id))
