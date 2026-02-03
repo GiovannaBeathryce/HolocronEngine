@@ -3,6 +3,8 @@ import pytest
 import sys
 import os
 
+from src.services.planet_service import PlanetService
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from src.main import app as flask_app
@@ -20,3 +22,7 @@ def client(app):
 @pytest.fixture
 def sw_service():
     return CharacterService()
+
+@pytest.fixture
+def planet_serv():
+    return PlanetService()
