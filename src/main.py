@@ -5,6 +5,7 @@ from src.services.planet_service import PlanetService
 from src.services.starships_service import StarshipsService
 from src.services.vehicles_service import VehiclesService
 from src.services.movie_service import MovieService
+from src.services.search_service import SearchService
 
 app = Flask(__name__)
 
@@ -20,6 +21,7 @@ planet_service = PlanetService()
 starshipsService = StarshipsService()
 vehicles_service = VehiclesService()
 movie_service = MovieService()
+search_service = SearchService()
 
 @app.route('/personagens', methods=['GET'])
 def list_or_search_characters():
@@ -96,3 +98,8 @@ def starships_of_movie(id):
 @app.route('/filme/<int:id>/veiculos', methods=['GET'])
 def vehicles_of_movie(id):
     return jsonify(movie_service.get_movie_related_resource(id, 'vehicles'))
+
+@app.route('/busca', methods=['GET'])
+def search_global():
+    termo = request.args.get('q', '')
+    return jsonify(search_service.global_search(termo))
