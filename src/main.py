@@ -33,6 +33,10 @@ def list_or_search_characters():
 @app.route('/personagem/<int:id>', methods=['GET'])
 def detalhes(id):
     return jsonify(character_service.get_character_details(id))
+
+@app.route('/personagem/<int:id>/especie', methods=['GET'])
+def detalhes_especie_personagem(id):
+    return jsonify(character_service.get_character_species_details(id))
         
 @app.route('/planetas', methods=['GET'])
 def list_or_search_planets():

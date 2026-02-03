@@ -39,11 +39,30 @@ class CharacterService(BaseService):
         self._save_to_cache(cache_key, formatted_results)
         return formatted_results
 
-    # Método auxiliar para buscar título de filme    
-    def _fetch_film_title(self, film_url):
-        film_id = film_url.split("/")[-2]
-        film_data = Client.fetch_data(f"films/{film_id}")
-        return film_data.get("title") if film_data else None    
+    def search_characters(self, query):
+        """
+            Listagem normal: localhost/personagens?page=1
+
+            Busca específica: localhost/personagens?nome=skywalker
+
+            Busca parcial: localhost/personagens?nome=lu (deve trazer Luke, Luminara, etc...)
+        """
+
+        data = Client.fetch_data("people", params={"search": query})
+        
+        if not data or data.get("count") == 0:
+            return {"erro": f"Nenhum personagem encontrado com '{query}'", "status": 404}
+
+        return {
+            "total_encontrados": data.get("count"),
+            "personagens": [
+                {
+                    "id": p["url"].split("/")[-2],
+                    "nome": p["name"],
+                } for p in data.get("results")
+            ]
+        }
+    
     
     def get_character_details(self, char_id):
         cache_key = f"char_detail_{char_id}"
@@ -57,9 +76,13 @@ class CharacterService(BaseService):
             return {"erro": "Personagem não encontrado", "status": 404}
 
         # chamada do método auxiliar
+
         film_urls = data.get("films", [])
+
         with ThreadPoolExecutor() as executor:
-            filmes = list(executor.map(self._fetch_film_title, film_urls))
+            filmes_future = executor.map(self._fetch_film_title, film_urls)
+            
+            filmes = list(filmes_future)
         
         especie_nome = "Desconhecida"
         especie = data.get("species", [])
@@ -91,33 +114,48 @@ class CharacterService(BaseService):
                 "cor_da_pele": data.get("skin_color"),
                 "cor_dos_olhos": data.get("eye_color"),
             },
+            "detalhes_da_especie": {
+                "detalhes": f"/personagem/{char_id}/especie",
+            } if especie_nome != "Desconhecida" else {},
             "filmes": filmes,
         }
             
         self._save_to_cache(cache_key, formatted_char)
         return formatted_char
         
-    def search_characters(self, query):
-        """
-            Listagem normal: localhost/personagens?page=1
+    def get_character_species_details(self, char_id):
+            """Busca os detalhes completos da espécie de um personagem específico"""
+            cache_key = f"char_{char_id}_species_full"
+            cached = self._get_from_cache(cache_key)
+            if cached: return cached
 
-            Busca específica: localhost/personagens?nome=skywalker
+            char_data = Client.fetch_data(f"people/{char_id}")
+            if not char_data:
+                return {"erro": "Personagem não encontrado", "status": 404}
 
-            Busca parcial: localhost/personagens?nome=lu (deve trazer Luke, Luminara, etc...)
-        """
+            species_urls = char_data.get("species", [])
+            if not species_urls:
+                return {"mensagem": "Este personagem não possui uma espécie específica registrada (provavelmente Humano).", "especie": None}
 
-        data = Client.fetch_data("people", params={"search": query})
-        
-        if not data or data.get("count") == 0:
-            return {"erro": f"Nenhum personagem encontrado com '{query}'", "status": 404}
+            species_id = species_urls[0].split("/")[-2]
+            data = Client.fetch_data(f"species/{species_id}")
+            
+            if not data:
+                return {"erro": "Detalhes da espécie não encontrados", "status": 404}
 
-        return {
-            "total_encontrados": data.get("count"),
-            "personagens": [
-                {
-                    "id": p["url"].split("/")[-2],
-                    "nome": p["name"],
-                } for p in data.get("results")
-            ]
-        }
-    
+            formatted_species = {
+                "personagem": char_data.get("name"),
+                "nome_especie": data.get("name"),
+                "classificacao": data.get("classification"),
+                "designacao": data.get("designation"),
+                "altura_media": data.get("average_height"),
+                "cores_pele": data.get("skin_colors"),
+                "cores_cabelo": data.get("hair_colors"),
+                "cores_olhos": data.get("eye_colors"),
+                "expectativa_vida": data.get("average_lifespan"),
+                "linguagem": data.get("language"),
+                "planeta_origem": self._fetch_summary(data.get("homeworld")) if data.get("homeworld") else "Desconhecido"
+            }
+
+            self._save_to_cache(cache_key, formatted_species)
+            return formatted_species
