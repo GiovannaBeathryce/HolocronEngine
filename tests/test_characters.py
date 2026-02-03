@@ -15,7 +15,7 @@ def test_busca_personagem_mockado(client, mocker):
         "personagens": [{"id": "1", "nome": "Luke Teste"}]
     }
     """ Interceptamos a chamada do serviço"""
-    mocker.patch('src.services.holocron_service.HolocronService.search_characters', 
+    mocker.patch('src.services.character_service.CharacterService.search_characters', 
                  return_value=mock_retorno)
 
     response = client.get('/personagens?nome=Luke')
