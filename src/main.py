@@ -4,6 +4,7 @@ from src.services.character_service import CharacterService
 from src.services.planet_service import PlanetService
 from src.services.starships_service import StarshipsService
 from src.services.vehicles_service import VehiclesService
+from src.services.movie_service import MovieService
 
 app = Flask(__name__)
 
@@ -18,6 +19,7 @@ character_service = CharacterService()
 planet_service = PlanetService()
 starshipsService = StarshipsService()
 vehicles_service = VehiclesService()
+movie_service = MovieService()
 
 @app.route('/personagens', methods=['GET'])
 def list_or_search_characters():
@@ -65,3 +67,28 @@ def list_vehicles():
 @app.route('/veiculo/<int:id>', methods=['GET'])
 def vehicle_details(id):
     return jsonify(vehicles_service.get_vehicle_details(id))
+
+@app.route("/filmes", methods=['GET'])
+def list_movises():
+    page = request.args.get('page', 1, type=int)
+    return jsonify(movie_service.get_movies(page))
+
+@app.route('/filme/<int:id>', methods=['GET'])
+def basic_details_movies(id):
+    return jsonify(movie_service.get_movie_basic_info(id))
+
+@app.route('/filme/<int:id>/personagens', methods=['GET'])
+def characters_of_movie(id):
+    return jsonify(movie_service.get_movie_related_resource(id, 'characters'))
+
+@app.route('/filme/<int:id>/planetas', methods=['GET'])
+def planets_of_movie(id):
+    return jsonify(movie_service.get_movie_related_resource(id, 'planets'))
+
+@app.route('/filme/<int:id>/naves', methods=['GET'])
+def starships_of_movie(id):
+    return jsonify(movie_service.get_movie_related_resource(id, 'starships'))
+
+@app.route('/filme/<int:id>/veiculos', methods=['GET'])
+def vehicles_of_movie(id):
+    return jsonify(movie_service.get_movie_related_resource(id, 'vehicles'))

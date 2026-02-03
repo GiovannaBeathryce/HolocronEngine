@@ -25,3 +25,21 @@ class BaseService:
         film_id = film_url.split("/")[-2]
         film_data = Client.fetch_data(f"films/{film_id}")
         return film_data.get("title") if film_data else "Filme Desconhecido"
+    
+    def _fetch_summary(self, url):
+        """
+        Busca ID e Nome/Título de qualquer URL da SWAPI.
+        """
+        if not url: return None
+        
+        parts = url.strip("/").split("/")
+        resource_type = parts[-2] 
+        resource_id = parts[-1]   
+        
+        data = Client.fetch_data(f"{resource_type}/{resource_id}")
+        if not data: return None
+
+        return {
+            "id": resource_id,
+            "nome": data.get("name") or data.get("title")
+        }
