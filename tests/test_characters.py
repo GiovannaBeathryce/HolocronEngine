@@ -21,3 +21,30 @@ def test_busca_personagem_mockado(client, mocker):
     response = client.get('/personagens?nome=Luke')
     assert response.status_code == 200
     assert response.json['personagens'][0]['nome'] == "Luke Teste"
+
+def test_get_character_species_full_details(sw_service, mocker):
+    """Testa se a rota de espécie traz os dados técnicos (ex: Wookiee para o Chewbacca)"""
+    
+    mock_char = {"name": "Chewbacca", "species": ["https://swapi.dev/api/species/3/"]}
+    mock_spec = {
+        "name": "Wookie",
+        "classification": "mammal",
+        "language": "Shyriiwook",
+        "average_lifespan": "400",
+        "homeworld": "https://swapi.dev/api/planets/14/"
+    }
+    mock_home = {"name": "Kashyyyk"}
+
+    mocker.patch('src.services.client.Client.fetch_data', side_effect=[
+        mock_char, 
+        mock_spec,
+        mock_home
+    ])
+
+    result = sw_service.get_character_species_details("13")
+
+    assert result["personagem"] == "Chewbacca"
+    assert result["nome_especie"] == "Wookie"
+    assert result["linguagem"] == "Shyriiwook"
+    assert result["planeta_origem"]["nome"] == "Kashyyyk"    
+
