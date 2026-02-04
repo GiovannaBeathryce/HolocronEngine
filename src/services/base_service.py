@@ -8,18 +8,20 @@ class BaseService:
     def __init__(self, resource_name):
         self.resource = resource_name
         self.cache_file = 'holocron_cache'
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     def _get_from_cache(self, key):
         with shelve.open(self.cache_file) as db:
             if key in db:
-                logger.info(f"CACHE HIT: Recuperando {key}")
+                self.logger.info(f"CACHE HIT: Recuperando {key}")
                 return db[key]
+            self.logger.info(f"CACHE MISS: {key} não encontrado. Chamando API...")
             return None
-
+        
     def _save_to_cache(self, key, data):
         with shelve.open(self.cache_file) as db:
             db[key] = data
-            logger.info(f"CACHE SAVED: {key} armazenado.")
+            self.logger.info(f"CACHE SAVED: {key} armazenado.")
 
     def _fetch_film_title(self, film_url):
         film_id = film_url.split("/")[-2]
