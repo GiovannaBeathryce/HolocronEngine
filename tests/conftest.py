@@ -26,3 +26,7 @@ def sw_service():
 @pytest.fixture
 def planet_serv():
     return PlanetService()
+
+@pytest.fixture(autouse=True)
+def mock_env_vars():
+    os.environ['API_KEY'] = 'test-secret-key'

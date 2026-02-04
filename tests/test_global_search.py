@@ -25,3 +25,16 @@ def test_global_search_structure(search_service, mocker):
     assert result["termo_buscado"] == "Skywalker"
     assert "personagens" in result["resultados"]
     assert result["resultados"]["personagens"][0]["nome"] == "Luke Skywalker"
+
+def test_global_search_success(client):
+    headers = {'SW-API-KEY': 'test-secret-key'}
+    response = client.get('/busca?q=luke', headers=headers)
+    
+    assert response.status_code == 200
+    assert "personagens" in response.json['resultados']
+
+def test_global_search_unauthorized(client):
+    response = client.get('/busca?q=luke')
+    
+    assert response.status_code == 401
+    assert response.json['erro'] == "Não autorizado"
