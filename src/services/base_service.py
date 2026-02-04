@@ -1,3 +1,5 @@
+import os
+import tempfile
 import shelve
 import logging
 from src.services.client import Client
@@ -7,7 +9,8 @@ logger = logging.getLogger(__name__)
 class BaseService:
     def __init__(self, resource_name):
         self.resource = resource_name
-        self.cache_file = 'holocron_cache'
+        temp_dir = tempfile.gettempdir()
+        self.cache_file = os.path.join(temp_dir, 'holocron_cache')
         self.logger = logging.getLogger(self.__class__.__name__)
 
     def _get_from_cache(self, key):
@@ -45,3 +48,4 @@ class BaseService:
             "id": resource_id,
             "nome": data.get("name") or data.get("title")
         }
+    

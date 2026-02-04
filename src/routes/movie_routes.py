@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+from src.auth import require_api_key
 from src.services.movie_service import MovieService
 
 movie_bp = Blueprint('movie_bp', __name__)
@@ -14,17 +15,22 @@ def basic_details_movies(id):
     return jsonify(movie_service.get_movie_basic_info(id))
 
 @movie_bp.route('/filme/<int:id>/personagens', methods=['GET'])
+@require_api_key
 def characters_of_movie(id):
     return jsonify(movie_service.get_movie_related_resource(id, 'characters'))
 
 @movie_bp.route('/filme/<int:id>/planetas', methods=['GET'])
+@require_api_key
 def planets_of_movie(id):
     return jsonify(movie_service.get_movie_related_resource(id, 'planets'))
 
 @movie_bp.route('/filme/<int:id>/naves', methods=['GET'])
+@require_api_key
 def starships_of_movie(id):
     return jsonify(movie_service.get_movie_related_resource(id, 'starships'))
 
 @movie_bp.route('/filme/<int:id>/veiculos', methods=['GET'])
+@require_api_key
 def vehicles_of_movie(id):
     return jsonify(movie_service.get_movie_related_resource(id, 'vehicles'))
+

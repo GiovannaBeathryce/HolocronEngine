@@ -1,4 +1,5 @@
-from flask import Blueprint, app, jsonify, request
+from flask import Blueprint, jsonify, request
+from src.auth import require_api_key
 from src.services.character_service import CharacterService
 
 character_bp = Blueprint('character_bp', __name__)
@@ -18,5 +19,6 @@ def character_details(id):
     return jsonify(character_service.get_character_details(id))
 
 @character_bp.route('/personagem/<int:id>/especie', methods=['GET'])
+@require_api_key
 def get_species_details(id):
     return jsonify(character_service.get_character_species_details(id))
