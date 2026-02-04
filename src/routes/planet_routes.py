@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+from src.auth import require_api_key
 from src.services.planet_service import PlanetService
 
 planet_bp = Blueprint('planet_bp', __name__)
@@ -17,5 +18,6 @@ def planet_details(id):
     return jsonify(planet_service.get_planet_details(id))
 
 @planet_bp.route('/planeta/<int:id>/residentes', methods=['GET'])
+@require_api_key
 def list_residents(id):
     return jsonify(planet_service.get_planet_residents(id))
